@@ -1,73 +1,92 @@
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Lock, Shield, User } from 'lucide-react';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [pin, setPin] = useState('');
-  const [error, setError] = useState(false);
   const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (pin === '1234') {
-      // In a real app, use next-auth or set a secure httpOnly cookie.
-      // For this prototype, we'll use a simple localStorage token for fast demonstration
-      localStorage.setItem('config_admin_auth', 'true');
-      router.push('/dashboard');
+    setLoading(true);
+    setError("");
+    await new Promise(r => setTimeout(r, 900));
+    if (password === "1234") {
+      localStorage.setItem("config_admin_auth", "1");
+      router.push("/dashboard");
     } else {
-      setError(true);
-      setPin('');
+      setError("Invalid access code. Please try again.");
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-emerald-600/20 blur-[150px]" />
+    <div style={{
+      minHeight: "100vh",
+      background: "radial-gradient(ellipse at 50% -10%, #1e1040 0%, #090914 55%, #000008 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      position: "relative", overflow: "hidden",
+    }}>
+      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(99,102,241,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.045) 1px, transparent 1px)", backgroundSize: "64px 64px", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "800px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "-5%", right: "15%", width: "300px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-      <div className="z-10 w-full max-w-md bg-slate-900/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-800 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
+      <div style={{ position: "relative", width: "100%", maxWidth: "420px", margin: "0 24px", background: "rgba(13,10,32,0.88)", backdropFilter: "blur(28px)", border: "1px solid rgba(99,102,241,0.18)", borderRadius: "24px", padding: "48px", boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(99,102,241,0.06), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
         
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
-            <Shield size={32} className="text-indigo-400" />
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <div style={{ width: "60px", height: "60px", margin: "0 auto 20px", borderRadius: "18px", background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 1px rgba(99,102,241,0.3), 0 8px 32px rgba(99,102,241,0.4)" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+            </svg>
           </div>
+          <h1 style={{ color: "#f1f5f9", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 8px", letterSpacing: "-0.025em" }}>Procgen Config</h1>
+          <p style={{ color: "rgba(148,163,184,0.55)", fontSize: "0.8rem", margin: 0, letterSpacing: "0.1em", textTransform: "uppercase" }}>Super Admin Portal</p>
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-slate-100 mb-2">Configurations Portal</h1>
-        <p className="text-center text-slate-400 text-sm mb-8">Enter your secure PIN to access tenant configurations.</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
+          <div style={{ flex: 1, height: "1px", background: "linear-gradient(to right, transparent, rgba(99,102,241,0.25))" }} />
+          <span style={{ color: "rgba(99,102,241,0.5)", fontSize: "0.68rem", letterSpacing: "0.12em" }}>SECURE ACCESS</span>
+          <div style={{ flex: 1, height: "1px", background: "linear-gradient(to left, transparent, rgba(99,102,241,0.25))" }} />
+        </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock size={18} className="text-slate-500" />
-              </div>
-              <input
-                type="password"
-                required
-                value={pin}
-                onChange={(e) => { setPin(e.target.value); setError(false); }}
-                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-xl leading-5 bg-slate-800/50 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all sm:text-sm"
-                placeholder="Enter PIN (1234)"
-              />
-            </div>
-            {error && <p className="mt-2 text-sm text-red-400 text-center">Invalid PIN. Please try again.</p>}
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "10px" }}>Access Code</label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoFocus
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              style={{ width: "100%", padding: "14px 16px", background: focused ? "rgba(99,102,241,0.06)" : "rgba(255,255,255,0.03)", border: error ? "1px solid rgba(239,68,68,0.45)" : focused ? "1px solid rgba(99,102,241,0.5)" : "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1.1rem", outline: "none", letterSpacing: "0.25em", transition: "all 0.2s", boxSizing: "border-box", boxShadow: focused ? "0 0 0 3px rgba(99,102,241,0.12)" : "none" }}
+            />
+            {error && <p style={{ color: "#f87171", fontSize: "0.78rem", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px", margin: "8px 0 0" }}>⚠ {error}</p>}
           </div>
 
-          <button
-            type="submit"
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 transition-all"
-          >
-            Authenticate
+          <button type="submit" disabled={loading || !password} style={{ width: "100%", padding: "14px", background: loading || !password ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)", border: "none", borderRadius: "12px", color: "#fff", fontSize: "0.9rem", fontWeight: 600, cursor: loading || !password ? "not-allowed" : "pointer", letterSpacing: "0.01em", transition: "all 0.25s", boxShadow: loading || !password ? "none" : "0 4px 24px rgba(99,102,241,0.4)", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", opacity: !password ? 0.5 : 1 }}>
+            {loading ? (
+              <>
+                <div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.25)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                Authenticating...
+              </>
+            ) : "Access Dashboard →"}
           </button>
         </form>
+
+        <p style={{ textAlign: "center", color: "rgba(71,85,105,0.7)", fontSize: "0.7rem", marginTop: "28px", marginBottom: 0 }}>
+          Restricted to authorized Procgen administrators only
+        </p>
       </div>
-      <div className="mt-8 text-center text-slate-600 text-xs font-medium z-10">
-        POWERED BY PROCGEN INC.
-      </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
     </div>
   );
 }
