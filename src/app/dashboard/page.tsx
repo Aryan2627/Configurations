@@ -15,6 +15,8 @@ const defaultModules = {
   contract_analyzer: false,
   advanced_analytics: false,
   vendor_portal: false,
+  erp_integration: false,
+  supplier_risk_scoring: false,
 };
 
 export default function DashboardPage() {
@@ -175,6 +177,8 @@ export default function DashboardPage() {
               <ModuleToggle id="advanced_analytics" label="Advanced Analytics" icon={Database} desc="Enable dynamic dashboard metrics and charts." />
               <ModuleToggle id="vendor_portal" label="Vendor Portal Access" icon={Box} desc="Allow suppliers to access the external bidding portal." />
               <ModuleToggle id="contract_analyzer" label="Legal Contract Analyzer" icon={FileText} desc="Enable CUAD-based legal clause extraction." />
+              <ModuleToggle id="erp_integration" label="ERP Sync Integration" icon={Settings} desc="Enable 2-way SAP/Oracle real-time syncing." />
+              <ModuleToggle id="supplier_risk_scoring" label="Supplier Risk Scoring" icon={AlertTriangle} desc="Activate real-time global risk data monitoring." />
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-800 flex items-center justify-end gap-4">
