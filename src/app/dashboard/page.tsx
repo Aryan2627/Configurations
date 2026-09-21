@@ -123,6 +123,10 @@ export default function DashboardPage() {
             {isDirty && (
               <span style={{ padding: "4px 10px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "6px", color: "#fbbf24", fontSize: "0.72rem", fontWeight: 600 }}>● Unsaved changes</span>
             )}
+            <a href="/dashboard/form-builder" style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: "8px", color: "#818cf8", fontSize: "0.8rem", cursor: "pointer", transition: "all 0.2s", textDecoration: "none", fontWeight: 600 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              Form Builder
+            </a>
             <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", color: "rgba(148,163,184,0.8)", fontSize: "0.8rem", cursor: "pointer", transition: "all 0.2s", fontFamily: "inherit" }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               Sign out
