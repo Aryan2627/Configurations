@@ -34,6 +34,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [searchOrg, setSearchOrg] = useState("");
   const [hoveredModule, setHoveredModule] = useState(null);
+  const [activeTab, setActiveTab] = useState("Modules");
+  const [licenseData, setLicenseData] = useState({ start: "", end: "", status: "Active" });
   const [activeCategory, setActiveCategory] = useState("All");
   const [isDirty, setIsDirty] = useState(false);
 
@@ -54,6 +56,27 @@ export default function DashboardPage() {
   const toggleModule = (id) => {
     setModules(prev => ({ ...prev, [id]: !prev[id] }));
     setIsDirty(true);
+  };
+
+  const handleSaveLicense = async () => {
+    setSaving(true);
+    try {
+      await fetch('/api/orgs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id: selectedOrgId,
+          licenseStart: licenseData.start ? new Date(licenseData.start).toISOString() : null,
+          licenseEnd: licenseData.end ? new Date(licenseData.end).toISOString() : null,
+          licenseStatus: licenseData.status
+        })
+      });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch(e) {
+      alert("Failed to save license");
+    }
+    setSaving(false);
   };
 
   const handleSave = async () => {
