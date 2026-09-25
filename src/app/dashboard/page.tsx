@@ -19,7 +19,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [orgs, setOrgs] = useState<any[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState("");
-  const [modules, setModules] = useState<Record<string, boolean>>(defaultModules);
+  const [modules, setModules] = useState<any>(defaultModules);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   
@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!selectedOrgId) { setModules(defaultModules); setIsDirty(false); return; }
-    const org = orgs.find(o => o.id === selectedOrgId);
+    const org = (Array.isArray(orgs) ? orgs : []).find(o => o.id === selectedOrgId);
     if (org && org.features) {
       try { setModules({ ...defaultModules, ...JSON.parse(org.features) }); } catch { setModules(defaultModules); }
     } else { setModules(defaultModules); }
@@ -55,7 +55,7 @@ export default function DashboardPage() {
   }, [selectedOrgId, orgs]);
 
   const toggleModule = (id: string) => {
-    setModules(prev => ({ ...prev, [id]: !prev[id] }));
+    setModules((prev: any) => ({ ...prev, [id]: !prev[id] }));
     setIsDirty(true);
   };
 
@@ -98,8 +98,8 @@ export default function DashboardPage() {
 
   const handleLogout = () => { localStorage.removeItem("config_admin_auth"); router.push("/"); };
 
-  const selectedOrg = orgs.find(o => o.id === selectedOrgId);
-  const enabledCount = Object.values(modules).filter(Boolean).length;
+  const selectedOrg = (Array.isArray(orgs) ? orgs : []).find(o => o.id === selectedOrgId);
+  const enabledCount = MODULES.filter(m => modules[m.id]).length;
   const filteredOrgs = (Array.isArray(orgs) ? orgs : []).filter(o => (o?.name || "").toLowerCase().includes(searchOrg.toLowerCase()));
 
   if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faff", color: "#475569" }}>Loading Configuration Engine...</div>;
@@ -198,6 +198,51 @@ export default function DashboardPage() {
                   <div style={{ display: 'flex', gap: '12px', alignItems: "center" }}>
                     <button onClick={handleSaveLicense} disabled={licenseSaving} style={{ padding: "10px 24px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 600, cursor: "pointer" }}>{licenseSaving ? 'Saving...' : 'Save License Settings'}</button>
                     {licenseSuccess && <span style={{ color: '#10b981', fontWeight: 600, fontSize: "0.85rem" }}>License updated!</span>}
+                  </div>
+                </div>
+
+                {/* 3. Advanced Entitlements & Billing */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h2 style={{ color: '#0f172a', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Entitlements & Billing</h2>
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                    <div>
+                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Total Seats Allocated</label>
+                      <input type='number' value={modules.seats_allocated || 0} onChange={e => { setModules({...modules, seats_allocated: parseInt(e.target.value)}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Seats Currently Used</label>
+                      <input type='number' value={modules.seats_used || 0} onChange={e => { setModules({...modules, seats_used: parseInt(e.target.value)}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Maintenance SLA Tier</label>
+                      <select value={modules.sla_tier || 'Standard'} onChange={e => { setModules({...modules, sla_tier: e.target.value}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }}>
+                        <option value='Standard'>Standard (48h)</option>
+                        <option value='Premium'>Premium (24h)</option>
+                        <option value='Platinum'>Platinum (4h 24/7)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Contract Expiry Date</label>
+                      <input type='date' value={modules.contract_expiry || ''} onChange={e => { setModules({...modules, contract_expiry: e.target.value}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Next Payment Amount ($)</label>
+                      <input type='number' value={modules.payment_due || 0} onChange={e => { setModules({...modules, payment_due: parseInt(e.target.value)}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Payment Due Date</label>
+                      <input type='date' value={modules.payment_date || ''} onChange={e => { setModules({...modules, payment_date: e.target.value}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <button onClick={handleSave} disabled={saving || !isDirty} style={{ padding: '10px 24px', background: !isDirty ? '#f1f5f9' : '#10b981', color: !isDirty ? '#94a3b8' : '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: !isDirty || saving ? 'not-allowed' : 'pointer' }}>
+                      {saving ? 'Syncing...' : 'Sync Entitlements'}
+                    </button>
+                    {saveSuccess && <span style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>Synced successfully!</span>}
                   </div>
                 </div>
 
