@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const orgs = await prisma.organization.findMany({
-      select: { id: true, name: true, features: true, licenseStart: true, licenseEnd: true, licenseStatus: true },
+      select: { id: true, name: true, features: true, licenseStart: true, licenseEnd: true, licenseStatus: true, licensePlan: true },
       orderBy: { name: 'asc' }
     });
     return NextResponse.json(orgs);
@@ -18,12 +18,13 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { id, features, licenseStart, licenseEnd, licenseStatus } = await req.json();
+    const { id, features, licenseStart, licenseEnd, licenseStatus, licensePlan } = await req.json();
     const data = {};
     if (features !== undefined) data.features = features;
     if (licenseStart !== undefined) data.licenseStart = licenseStart;
     if (licenseEnd !== undefined) data.licenseEnd = licenseEnd;
     if (licenseStatus !== undefined) data.licenseStatus = licenseStatus;
+    if (licensePlan !== undefined) data.licensePlan = licensePlan;
     
     const updated = await prisma.organization.update({
       where: { id },

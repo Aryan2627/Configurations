@@ -28,7 +28,7 @@ export default function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [searchOrg, setSearchOrg] = useState("");
-  const [licenseData, setLicenseData] = useState({ start: "", end: "", status: "Active" });
+  const [licenseData, setLicenseData] = useState({ start: "", end: "", status: "Active", plan: "Enterprise" });
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
@@ -47,7 +47,8 @@ export default function DashboardPage() {
       setLicenseData({
         start: org.licenseStart ? new Date(org.licenseStart).toISOString().split('T')[0] : "",
         end: org.licenseEnd ? new Date(org.licenseEnd).toISOString().split('T')[0] : "",
-        status: org.licenseStatus || "Active"
+        status: org.licenseStatus || "Active",
+        plan: org.licensePlan || "Enterprise"
       });
     }
     setIsDirty(false);
@@ -68,7 +69,8 @@ export default function DashboardPage() {
           id: selectedOrgId,
           licenseStart: licenseData.start ? new Date(licenseData.start).toISOString() : null,
           licenseEnd: licenseData.end ? new Date(licenseData.end).toISOString() : null,
-          licenseStatus: licenseData.status
+          licenseStatus: licenseData.status,
+          licensePlan: licenseData.plan
         })
       });
       setLicenseSuccess(true);
@@ -170,7 +172,7 @@ export default function DashboardPage() {
                     <h2 style={{ color: "#0f172a", fontSize: "1.1rem", fontWeight: 700, margin: 0 }}>License Configuration</h2>
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',  gap: '20px', marginBottom: '24px' }}>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Start Date</label>
                       <input type="date" value={licenseData.start} onChange={e => setLicenseData({...licenseData, start: e.target.value})} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
