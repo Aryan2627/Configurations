@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 const prisma = new PrismaClient();
 
 export async function GET() {
@@ -19,7 +21,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { id, features, licenseStart, licenseEnd, licenseStatus, licensePlan } = await req.json();
-    const data = {};
+    const data: any = {};
     if (features !== undefined) data.features = features;
     if (licenseStart !== undefined) data.licenseStart = licenseStart;
     if (licenseEnd !== undefined) data.licenseEnd = licenseEnd;

@@ -33,7 +33,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!localStorage.getItem("config_admin_auth")) { router.push("/"); return; }
-    fetch("/api/orgs").then(r => r.json()).then(data => { setOrgs(data || []); setLoading(false); }).catch(() => setLoading(false));
+    fetch("/api/orgs").then(r => r.json()).then(data => { setOrgs(Array.isArray(data) ? data : []); setLoading(false); }).catch(() => setLoading(false));
   }, [router]);
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
   const selectedOrg = orgs.find(o => o.id === selectedOrgId);
   const enabledCount = Object.values(modules).filter(Boolean).length;
-  const filteredOrgs = orgs.filter(o => (o.name || "").toLowerCase().includes(searchOrg.toLowerCase()));
+  const filteredOrgs = (Array.isArray(orgs) ? orgs : []).filter(o => (o?.name || "").toLowerCase().includes(searchOrg.toLowerCase()));
 
   if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faff", color: "#475569" }}>Loading Configuration Engine...</div>;
 
