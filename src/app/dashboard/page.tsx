@@ -210,11 +210,11 @@ export default function DashboardPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Total Seats Allocated</label>
-                      <input type='number' value={modules.seats_allocated || 0} onChange={e => { setModules({...modules, seats_allocated: parseInt(e.target.value)}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                      <input type='text' inputMode='numeric' pattern='[0-9]*' value={modules.seats_allocated ?? ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setModules({...modules, seats_allocated: val ? parseInt(val, 10) : ''}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Seats Currently Used</label>
-                      <input type='number' value={modules.seats_used || 0} onChange={e => { setModules({...modules, seats_used: parseInt(e.target.value)}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                      <input type='text' inputMode='numeric' pattern='[0-9]*' value={modules.seats_used ?? ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setModules({...modules, seats_used: val ? parseInt(val, 10) : ''}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Maintenance SLA Tier</label>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Next Payment Amount ($)</label>
-                      <input type='number' value={modules.payment_due || 0} onChange={e => { setModules({...modules, payment_due: parseInt(e.target.value)}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
+                      <input type='text' inputMode='numeric' pattern='[0-9]*' value={modules.payment_due ?? ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setModules({...modules, payment_due: val ? parseInt(val, 10) : ''}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Payment Due Date</label>
