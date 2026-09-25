@@ -12,9 +12,9 @@ export async function GET() {
       orderBy: { name: 'asc' }
     });
     return NextResponse.json(orgs);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 });
+  } catch (error: any) {
+    console.error("GET ORGS ERROR:", error);
+    return NextResponse.json({ error: 'Failed to fetch organizations', details: error.message }, { status: 500 });
   }
 }
 
@@ -33,8 +33,8 @@ export async function POST(req: Request) {
       data
     });
     return NextResponse.json(updated);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to update organization' }, { status: 500 });
+  } catch (error: any) {
+    console.error("POST ORGS ERROR:", error);
+    return NextResponse.json({ error: 'Failed to update organization', details: error.message }, { status: 500 });
   }
 }
