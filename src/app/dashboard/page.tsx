@@ -17,9 +17,9 @@ const defaultModules = Object.fromEntries(MODULES.map(m => [m.id, false]));
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [orgs, setOrgs] = useState([]);
+  const [orgs, setOrgs] = useState<any[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState("");
-  const [modules, setModules] = useState(defaultModules);
+  const [modules, setModules] = useState<Record<string, boolean>>(defaultModules);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   
@@ -33,7 +33,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!localStorage.getItem("config_admin_auth")) { router.push("/"); return; }
-    fetch("/api/orgs").then(r => r.json()).then(data => { setOrgs(data); setLoading(false); }).catch(() => setLoading(false));
+    fetch("/api/orgs").then(r => r.json()).then(data => { setOrgs(data || []); setLoading(false); }).catch(() => setLoading(false));
   }, [router]);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function DashboardPage() {
     setIsDirty(false);
   }, [selectedOrgId, orgs]);
 
-  const toggleModule = (id) => {
+  const toggleModule = (id: string) => {
     setModules(prev => ({ ...prev, [id]: !prev[id] }));
     setIsDirty(true);
   };
@@ -100,13 +100,12 @@ export default function DashboardPage() {
 
   const selectedOrg = orgs.find(o => o.id === selectedOrgId);
   const enabledCount = Object.values(modules).filter(Boolean).length;
-  const filteredOrgs = orgs.filter(o => o.name.toLowerCase().includes(searchOrg.toLowerCase()));
+  const filteredOrgs = orgs.filter(o => (o.name || "").toLowerCase().includes(searchOrg.toLowerCase()));
 
   if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faff", color: "#475569" }}>Loading Configuration Engine...</div>;
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8faff", fontFamily: "'Inter', system-ui, sans-serif", color: "#0f172a" }}>
-      {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid #e2e8f0", background: "#ffffff" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 32px", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -129,7 +128,6 @@ export default function DashboardPage() {
       <main style={{ maxWidth: "1400px", margin: "0 auto", padding: "40px 32px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "24px", alignItems: "start" }}>
 
-          {/* Sidebar - Client selector */}
           <div style={{ position: "sticky", top: "84px" }}>
             <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
               <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid #e2e8f0", background: "#f8fafc" }}>
@@ -156,7 +154,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Main Content Area */}
           <div>
             {!selectedOrgId ? (
               <div style={{ background: "#ffffff", border: "1px dashed #cbd5e1", borderRadius: "16px", padding: "80px 40px", textAlign: "center" }}>
@@ -166,13 +163,12 @@ export default function DashboardPage() {
             ) : (
               <div>
                 
-                {/* 1. License Configuration Section (SUPER VISIBLE) */}
                 <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "24px", marginBottom: "24px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                     <h2 style={{ color: "#0f172a", fontSize: "1.1rem", fontWeight: 700, margin: 0 }}>License Configuration</h2>
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',  gap: '20px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Start Date</label>
                       <input type="date" value={licenseData.start} onChange={e => setLicenseData({...licenseData, start: e.target.value})} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
@@ -189,6 +185,15 @@ export default function DashboardPage() {
                         <option value="Suspended">Suspended</option>
                       </select>
                     </div>
+                    <div>
+                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>License Plan</label>
+                      <select value={licenseData.plan} onChange={e => setLicenseData({...licenseData, plan: e.target.value})} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }}>
+                        <option value="Starter">Starter</option>
+                        <option value="Professional">Professional</option>
+                        <option value="Enterprise">Enterprise</option>
+                        <option value="Custom">Custom</option>
+                      </select>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '12px', alignItems: "center" }}>
                     <button onClick={handleSaveLicense} disabled={licenseSaving} style={{ padding: "10px 24px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 600, cursor: "pointer" }}>{licenseSaving ? 'Saving...' : 'Save License Settings'}</button>
@@ -196,7 +201,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* 2. Module Configuration Section */}
                 <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
                     <div>
