@@ -4,24 +4,39 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
+  
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    await new Promise(r => setTimeout(r, 900));
-    if (password === "1234") {
-      localStorage.setItem("config_admin_auth", "1");
-      router.push("/dashboard");
-    } else {
-      setError("Invalid access code. Please try again.");
+    
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, otp })
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        localStorage.setItem("config_admin_auth", data.token);
+        router.push("/dashboard");
+      } else {
+        setError(data.error || "Invalid access code. Please try again.");
+        setLoading(false);
+      }
+    } catch(err) {
+      setError("Network error. Please try again.");
       setLoading(false);
     }
   };
+
 
   return (
     <div style={{

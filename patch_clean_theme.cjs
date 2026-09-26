@@ -1,4 +1,9 @@
-"use client";
+const fs = require('fs');
+const path = require('path');
+
+const file = path.join('C:', 'Users', 'aryan', '.gemini', 'antigravity', 'scratch', 'Configurations', 'src', 'app', 'dashboard', 'page.tsx');
+
+const content = `"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -17,9 +22,9 @@ const defaultModules = Object.fromEntries(MODULES.map(m => [m.id, false]));
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [orgs, setOrgs] = useState<any[]>([]);
+  const [orgs, setOrgs] = useState([]);
   const [selectedOrgId, setSelectedOrgId] = useState("");
-  const [modules, setModules] = useState<any>(defaultModules);
+  const [modules, setModules] = useState(defaultModules);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   
@@ -28,17 +33,17 @@ export default function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [searchOrg, setSearchOrg] = useState("");
-  const [licenseData, setLicenseData] = useState({ start: "", end: "", status: "Active", plan: "Enterprise" });
+  const [licenseData, setLicenseData] = useState({ start: "", end: "", status: "Active" });
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem("config_admin_auth")) { router.push("/"); return; }
-    fetch("/api/orgs", { headers: { "Authorization": `Bearer ${localStorage.getItem("config_admin_auth")}` } }).then(r => r.json()).then(data => { setOrgs(Array.isArray(data) ? data : []); setLoading(false); }).catch(() => setLoading(false));
+    fetch("/api/orgs").then(r => r.json()).then(data => { setOrgs(data); setLoading(false); }).catch(() => setLoading(false));
   }, [router]);
 
   useEffect(() => {
     if (!selectedOrgId) { setModules(defaultModules); setIsDirty(false); return; }
-    const org = (Array.isArray(orgs) ? orgs : []).find(o => o.id === selectedOrgId);
+    const org = orgs.find(o => o.id === selectedOrgId);
     if (org && org.features) {
       try { setModules({ ...defaultModules, ...JSON.parse(org.features) }); } catch { setModules(defaultModules); }
     } else { setModules(defaultModules); }
@@ -47,15 +52,14 @@ export default function DashboardPage() {
       setLicenseData({
         start: org.licenseStart ? new Date(org.licenseStart).toISOString().split('T')[0] : "",
         end: org.licenseEnd ? new Date(org.licenseEnd).toISOString().split('T')[0] : "",
-        status: org.licenseStatus || "Active",
-        plan: org.licensePlan || "Enterprise"
+        status: org.licenseStatus || "Active"
       });
     }
     setIsDirty(false);
   }, [selectedOrgId, orgs]);
 
-  const toggleModule = (id: string) => {
-    setModules((prev: any) => ({ ...prev, [id]: !prev[id] }));
+  const toggleModule = (id) => {
+    setModules(prev => ({ ...prev, [id]: !prev[id] }));
     setIsDirty(true);
   };
 
@@ -64,13 +68,12 @@ export default function DashboardPage() {
     try {
       await fetch('/api/orgs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("config_admin_auth")}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           id: selectedOrgId,
           licenseStart: licenseData.start ? new Date(licenseData.start).toISOString() : null,
           licenseEnd: licenseData.end ? new Date(licenseData.end).toISOString() : null,
-          licenseStatus: licenseData.status,
-          licensePlan: licenseData.plan
+          licenseStatus: licenseData.status
         })
       });
       setLicenseSuccess(true);
@@ -85,7 +88,7 @@ export default function DashboardPage() {
     if (!selectedOrgId) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/orgs", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("config_admin_auth")}` }, body: JSON.stringify({ id: selectedOrgId, features: JSON.stringify(modules) }) });
+      const res = await fetch("/api/orgs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: selectedOrgId, features: JSON.stringify(modules) }) });
       if (res.ok) {
         setSaveSuccess(true);
         setOrgs(orgs.map(o => o.id === selectedOrgId ? { ...o, features: JSON.stringify(modules) } : o));
@@ -98,14 +101,15 @@ export default function DashboardPage() {
 
   const handleLogout = () => { localStorage.removeItem("config_admin_auth"); router.push("/"); };
 
-  const selectedOrg = (Array.isArray(orgs) ? orgs : []).find(o => o.id === selectedOrgId);
-  const enabledCount = MODULES.filter(m => modules[m.id]).length;
-  const filteredOrgs = (Array.isArray(orgs) ? orgs : []).filter(o => (o?.name || "").toLowerCase().includes(searchOrg.toLowerCase()));
+  const selectedOrg = orgs.find(o => o.id === selectedOrgId);
+  const enabledCount = Object.values(modules).filter(Boolean).length;
+  const filteredOrgs = orgs.filter(o => o.name.toLowerCase().includes(searchOrg.toLowerCase()));
 
   if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faff", color: "#475569" }}>Loading Configuration Engine...</div>;
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8faff", fontFamily: "'Inter', system-ui, sans-serif", color: "#0f172a" }}>
+      {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid #e2e8f0", background: "#ffffff" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 32px", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -128,6 +132,7 @@ export default function DashboardPage() {
       <main style={{ maxWidth: "1400px", margin: "0 auto", padding: "40px 32px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "24px", alignItems: "start" }}>
 
+          {/* Sidebar - Client selector */}
           <div style={{ position: "sticky", top: "84px" }}>
             <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
               <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid #e2e8f0", background: "#f8fafc" }}>
@@ -154,6 +159,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Main Content Area */}
           <div>
             {!selectedOrgId ? (
               <div style={{ background: "#ffffff", border: "1px dashed #cbd5e1", borderRadius: "16px", padding: "80px 40px", textAlign: "center" }}>
@@ -163,12 +169,13 @@ export default function DashboardPage() {
             ) : (
               <div>
                 
+                {/* 1. License Configuration Section (SUPER VISIBLE) */}
                 <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "24px", marginBottom: "24px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                     <h2 style={{ color: "#0f172a", fontSize: "1.1rem", fontWeight: 700, margin: 0 }}>License Configuration</h2>
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                     <div>
                       <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Start Date</label>
                       <input type="date" value={licenseData.start} onChange={e => setLicenseData({...licenseData, start: e.target.value})} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
@@ -185,15 +192,6 @@ export default function DashboardPage() {
                         <option value="Suspended">Suspended</option>
                       </select>
                     </div>
-                    <div>
-                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>License Plan</label>
-                      <select value={licenseData.plan} onChange={e => setLicenseData({...licenseData, plan: e.target.value})} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }}>
-                        <option value="Starter">Starter</option>
-                        <option value="Professional">Professional</option>
-                        <option value="Enterprise">Enterprise</option>
-                        <option value="Custom">Custom</option>
-                      </select>
-                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '12px', alignItems: "center" }}>
                     <button onClick={handleSaveLicense} disabled={licenseSaving} style={{ padding: "10px 24px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 600, cursor: "pointer" }}>{licenseSaving ? 'Saving...' : 'Save License Settings'}</button>
@@ -201,51 +199,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* 3. Advanced Entitlements & Billing */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{ color: '#0f172a', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Entitlements & Billing</h2>
-                  </div>
-                  
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-                    <div>
-                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Total Seats Allocated</label>
-                      <input type='text' inputMode='numeric' pattern='[0-9]*' value={modules.seats_allocated ?? ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setModules({...modules, seats_allocated: val ? parseInt(val, 10) : ''}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Seats Currently Used</label>
-                      <input type='text' inputMode='numeric' pattern='[0-9]*' value={modules.seats_used ?? ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setModules({...modules, seats_used: val ? parseInt(val, 10) : ''}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Maintenance SLA Tier</label>
-                      <select value={modules.sla_tier || 'Standard'} onChange={e => { setModules({...modules, sla_tier: e.target.value}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }}>
-                        <option value='Standard'>Standard (48h)</option>
-                        <option value='Premium'>Premium (24h)</option>
-                        <option value='Platinum'>Platinum (4h 24/7)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Contract Expiry Date</label>
-                      <input type='date' value={modules.contract_expiry || ''} onChange={e => { setModules({...modules, contract_expiry: e.target.value}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Next Payment Amount ($)</label>
-                      <input type='text' inputMode='numeric' pattern='[0-9]*' value={modules.payment_due ?? ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setModules({...modules, payment_due: val ? parseInt(val, 10) : ''}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', color: '#475569', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Payment Due Date</label>
-                      <input type='date' value={modules.payment_date || ''} onChange={e => { setModules({...modules, payment_date: e.target.value}); setIsDirty(true); }} style={{ width: '100%', padding: '10px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px' }} />
-                    </div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <button onClick={handleSave} disabled={saving || !isDirty} style={{ padding: '10px 24px', background: !isDirty ? '#f1f5f9' : '#10b981', color: !isDirty ? '#94a3b8' : '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: !isDirty || saving ? 'not-allowed' : 'pointer' }}>
-                      {saving ? 'Syncing...' : 'Sync Entitlements'}
-                    </button>
-                    {saveSuccess && <span style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>Synced successfully!</span>}
-                  </div>
-                </div>
-
+                {/* 2. Module Configuration Section */}
                 <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
                     <div>
@@ -290,3 +244,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync(file, content, 'utf8');
+console.log('Completely rebuilt Configurations dashboard!');
