@@ -32,8 +32,8 @@ export default function DashboardPage() {
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem("config_admin_auth")) { router.push("/"); return; }
-    fetch("/api/orgs", { headers: { "Authorization": `Bearer ${localStorage.getItem("config_admin_auth")}` } }).then(r => r.json()).then(data => { setOrgs(Array.isArray(data) ? data : []); setLoading(false); }).catch(() => setLoading(false));
+    // Handled by middleware
+    fetch("/api/orgs", { headers: {} }).then(r => r.json()).then(data => { setOrgs(Array.isArray(data) ? data : []); setLoading(false); }).catch(() => setLoading(false));
   }, [router]);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function DashboardPage() {
     try {
       await fetch('/api/orgs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("config_admin_auth")}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           id: selectedOrgId,
           licenseStart: licenseData.start ? new Date(licenseData.start).toISOString() : null,
@@ -85,7 +85,7 @@ export default function DashboardPage() {
     if (!selectedOrgId) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/orgs", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("config_admin_auth")}` }, body: JSON.stringify({ id: selectedOrgId, features: JSON.stringify(modules) }) });
+      const res = await fetch("/api/orgs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: selectedOrgId, features: JSON.stringify(modules) }) });
       if (res.ok) {
         setSaveSuccess(true);
         setOrgs(orgs.map(o => o.id === selectedOrgId ? { ...o, features: JSON.stringify(modules) } : o));

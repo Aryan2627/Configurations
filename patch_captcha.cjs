@@ -1,4 +1,8 @@
+const fs = require('fs');
+const path = require('path');
+const file = 'C:/Users/aryan/.gemini/antigravity/scratch/Configurations/src/app/page.tsx';
 
+let code = `
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -49,7 +53,7 @@ export default function LoginPage() {
       const data = await res.json();
       
       if (res.ok && data.success) {
-        // Using HttpOnly Cookies now
+        localStorage.setItem("config_admin_auth", data.token);
         router.push("/dashboard");
       } else {
         setError(data.error || "Invalid access code. Please try again.");
@@ -109,7 +113,7 @@ export default function LoginPage() {
             <input
               type="text"
               value={otp}
-              onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+              onChange={e => setOtp(e.target.value.replace(/\\D/g, ''))}
               maxLength={6}
               placeholder="000000"
               style={{ width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", boxSizing: "border-box", letterSpacing: "0.2em", textAlign: "center" }}
@@ -125,7 +129,7 @@ export default function LoginPage() {
                <input
                  type="text"
                  value={captchaInput}
-                 onChange={e => setCaptchaInput(e.target.value.replace(/\D/g, ''))}
+                 onChange={e => setCaptchaInput(e.target.value.replace(/\\D/g, ''))}
                  placeholder="Answer"
                  style={{ flex: 1, width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", boxSizing: "border-box", textAlign: "center" }}
                />
@@ -148,7 +152,11 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
+      <style>{\`@keyframes spin { to { transform: rotate(360deg); }}\`}</style>
     </div>
   );
 }
+`;
+
+fs.writeFileSync(file, code, 'utf8');
+console.log('Successfully rewritten the login page to include 2FA UI and CAPTCHA');

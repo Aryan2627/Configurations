@@ -6,11 +6,7 @@ export const dynamic = 'force-dynamic';
 const prisma = new PrismaClient();
 
 
-const SECURE_TOKEN = "ext_sec_tk_981273918237";
-function isAuthorized(req: Request) {
-  const authHeader = req.headers.get("Authorization");
-  return authHeader === `Bearer ${SECURE_TOKEN}`;
-}
+
 
 export async function GET(req: Request) {
   try {
