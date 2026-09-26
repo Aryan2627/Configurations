@@ -1,7 +1,7 @@
-
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Shield, KeyRound, ArrowRight, Lock, Fingerprint, ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [focused, setFocused] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // CAPTCHA State
   const [captchaNum1, setCaptchaNum1] = useState(0);
@@ -33,7 +33,7 @@ export default function LoginPage() {
 
     // Validate CAPTCHA
     if (parseInt(captchaInput) !== (captchaNum1 + captchaNum2)) {
-      setError("CAPTCHA validation failed. Are you human?");
+      setError("Human verification failed.");
       generateCaptcha();
       return;
     }
@@ -52,103 +52,145 @@ export default function LoginPage() {
         // Using HttpOnly Cookies now
         router.push("/dashboard");
       } else {
-        setError(data.error || "Invalid access code. Please try again.");
+        setError(data.error || "Invalid security credentials.");
         generateCaptcha();
         setLoading(false);
       }
     } catch(err) {
-      setError("Network error. Please try again.");
+      setError("Network timeout. Secure connection failed.");
       generateCaptcha();
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "radial-gradient(ellipse at 50% -10%, #1e1040 0%, #090914 55%, #000008 100%)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-      position: "relative", overflow: "hidden",
-    }}>
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(99,102,241,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.045) 1px, transparent 1px)", backgroundSize: "64px 64px", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "800px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: "-5%", right: "15%", width: "300px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
-
-      <div style={{ position: "relative", width: "100%", maxWidth: "420px", margin: "0 24px", background: "rgba(13,10,32,0.88)", backdropFilter: "blur(28px)", border: "1px solid rgba(99,102,241,0.18)", borderRadius: "24px", padding: "48px", boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(99,102,241,0.06), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+    <div className="min-h-screen bg-[#02040A] flex items-center justify-center relative overflow-hidden font-sans selection:bg-blue-500/30">
+      
+      {/* Abstract Background Elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-900/20 rounded-full blur-[120px] opacity-50 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-900/40 rounded-full blur-[80px] pointer-events-none" />
         
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <div style={{ width: "60px", height: "60px", margin: "0 auto 20px", borderRadius: "18px", background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 1px rgba(99,102,241,0.3), 0 8px 32px rgba(99,102,241,0.4)" }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h1 style={{ color: "#f1f5f9", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 8px", letterSpacing: "-0.025em" }}>Procgen Config</h1>
-          <p style={{ color: "rgba(148,163,184,0.55)", fontSize: "0.8rem", margin: 0, letterSpacing: "0.1em", textTransform: "uppercase" }}>Super Admin Portal</p>
-        </div>
-
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "8px" }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              autoFocus
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              style={{ width: "100%", padding: "14px 16px", background: focused ? "rgba(99,102,241,0.06)" : "rgba(255,255,255,0.03)", border: error && !password ? "1px solid rgba(239,68,68,0.45)" : focused ? "1px solid rgba(99,102,241,0.5)" : "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", transition: "all 0.2s", boxSizing: "border-box" }}
-            />
-          </div>
-
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "8px" }}>2FA Code</label>
-            <input
-              type="text"
-              value={otp}
-              onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-              maxLength={6}
-              placeholder="000000"
-              style={{ width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", boxSizing: "border-box", letterSpacing: "0.2em", textAlign: "center" }}
-            />
-          </div>
-
-          <div style={{ marginBottom: "24px" }}>
-            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "8px" }}>Human Verification</label>
-            <div style={{ display: "flex", gap: "12px" }}>
-               <div style={{ flex: "0 0 100px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "#a8b2d1", fontWeight: "bold", userSelect: "none" }}>
-                 {captchaNum1} + {captchaNum2}
-               </div>
-               <input
-                 type="text"
-                 value={captchaInput}
-                 onChange={e => setCaptchaInput(e.target.value.replace(/\D/g, ''))}
-                 placeholder="Answer"
-                 style={{ flex: 1, width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", boxSizing: "border-box", textAlign: "center" }}
-               />
-            </div>
-            {error && <p style={{ color: "#f87171", fontSize: "0.78rem", marginTop: "12px", display: "flex", alignItems: "center", gap: "6px" }}>⚠️ {error}</p>}
-          </div>
-
-          <button type="submit" disabled={loading || !password || !otp || !captchaInput} style={{ width: "100%", padding: "14px", background: loading || !password || !otp || !captchaInput ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)", border: "none", borderRadius: "12px", color: "#fff", fontSize: "0.9rem", fontWeight: 600, cursor: loading || !password || !otp || !captchaInput ? "not-allowed" : "pointer", letterSpacing: "0.01em", transition: "all 0.25s", boxShadow: loading || !password || !otp || !captchaInput ? "none" : "0 4px 24px rgba(99,102,241,0.4)", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", opacity: (!password || !otp || !captchaInput) ? 0.5 : 1 }}>
-            {loading ? (
-              <>
-                <div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.25)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
-                Authenticating...
-              </>
-            ) : "Secure Login →"}
-          </button>
-        </form>
-
-        <p style={{ textAlign: "center", color: "rgba(71,85,105,0.7)", fontSize: "0.7rem", marginTop: "28px", marginBottom: 0 }}>
-          Restricted to authorized Procgen administrators only
-        </p>
+        {/* Subtle Grid */}
+        <div 
+          className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+          style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+        />
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
+      <div className="w-full max-w-md relative z-10 px-6">
+        
+        {/* Glass Card */}
+        <div className="bg-slate-900/40 backdrop-blur-2xl border border-white/5 rounded-3xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
+          
+          {/* Shine effect */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+
+          {/* Header */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-b from-slate-800 to-black border border-white/10 shadow-lg mb-6 relative group">
+              <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <Shield className="w-7 h-7 text-blue-400 relative z-10" strokeWidth={1.5} />
+            </div>
+            <h1 className="text-2xl font-semibold text-white tracking-tight mb-2">ProcGen Security</h1>
+            <p className="text-slate-400 text-sm">Super Admin Configuration Portal</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            
+            {/* Password */}
+            <div>
+              <label className="flex items-center text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+                <KeyRound className="w-3.5 h-3.5 mr-2 opacity-70" /> Master Password
+              </label>
+              <div className="relative group">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="••••••••••••"
+                  autoFocus
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all duration-300"
+                />
+              </div>
+            </div>
+
+            {/* 2FA OTP */}
+            <div>
+              <label className="flex items-center text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+                <Fingerprint className="w-3.5 h-3.5 mr-2 opacity-70" /> Authenticator Code
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                  onFocus={() => setFocusedField('otp')}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="000000"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-center text-white font-mono text-xl tracking-[0.5em] placeholder:text-slate-700 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all duration-300"
+                />
+              </div>
+            </div>
+
+            {/* CAPTCHA */}
+            <div>
+              <label className="flex items-center text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+                <ShieldCheck className="w-3.5 h-3.5 mr-2 opacity-70" /> Human Verification
+              </label>
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-24 flex items-center justify-center bg-black/40 border border-white/10 rounded-xl text-blue-400 font-mono font-medium select-none">
+                  {captchaNum1} + {captchaNum2}
+                </div>
+                <input
+                  type="text"
+                  value={captchaInput}
+                  onChange={e => setCaptchaInput(e.target.value.replace(/\D/g, ''))}
+                  onFocus={() => setFocusedField('captcha')}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="Sum"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-center text-white font-mono placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all duration-300"
+                />
+              </div>
+            </div>
+
+            {/* Error Message */}
+            <div className={`overflow-hidden transition-all duration-300 ${error ? 'max-h-16 opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl flex items-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse" />
+                {error}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || !password || otp.length !== 6 || !captchaInput}
+              className="w-full group relative flex items-center justify-center gap-2 bg-white text-black font-semibold rounded-xl px-4 py-3.5 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-200 active:scale-[0.98]"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              ) : (
+                <>
+                  Authenticate Session
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+
+        </div>
+
+        {/* Footer Text */}
+        <p className="text-center text-slate-500 text-xs mt-8 font-medium">
+          <Lock className="w-3 h-3 inline-block mr-1 -mt-0.5 opacity-60" />
+          End-to-end encrypted session
+        </p>
+      </div>
     </div>
   );
 }
