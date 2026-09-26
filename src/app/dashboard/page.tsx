@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AutoLogout from "./AutoLogout";
+import { Shield } from "lucide-react";
 
 const MODULES = [
   { id: "cortex_ai", label: "Cortex AI Swarm", desc: "Multi-agent AI procurement assistant with slash commands and S2P workflow.", category: "AI", color: "#8b5cf6", icon: "🤖", status: "flagship" },
@@ -109,21 +110,24 @@ export default function DashboardPage() {
     <>
       <AutoLogout />
       <div style={{ minHeight: "100vh", background: "#f8faff", fontFamily: "'Inter', system-ui, sans-serif", color: "#0f172a" }}>
-      <header style={{ position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid #e2e8f0", background: "#ffffff" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 32px", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ width: "32px", height: "32px", borderRadius: "9px", background: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2.5" strokeLinejoin="round"/><path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2.5" strokeLinejoin="round"/><path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2.5" strokeLinejoin="round"/></svg>
+      <header className="sticky top-0 z-50 bg-[#02040A]/80 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-[1400px] mx-auto px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-b from-slate-800 to-black border border-white/10 shadow-lg relative">
+              <div className="absolute inset-0 bg-blue-500/20 rounded-lg blur-sm" />
+              <Shield className="w-4 h-4 text-blue-400 relative z-10" strokeWidth={2} />
             </div>
-            <div>
-              <span style={{ color: "#0f172a", fontSize: "1rem", fontWeight: 700 }}>Procgen Config</span>
+            <div className="flex items-center gap-2">
+              <span className="text-white text-base font-semibold tracking-tight">ProcGen</span>
+              <span className="text-slate-400 text-sm font-medium">Configurations</span>
             </div>
-            <span style={{ padding: "4px 8px", background: "#e0e7ff", border: "1px solid #c7d2fe", borderRadius: "6px", color: "#4f46e5", fontSize: "0.7rem", fontWeight: 700 }}>ADMIN</span>
+            <span className="ml-2 px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-xs font-semibold tracking-wider uppercase">Super Admin</span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-            <a href="/dashboard/form-builder" style={{ color: "#4f46e5", fontSize: "0.85rem", textDecoration: "none", fontWeight: 600 }}>Form Builder</a>
-            <button onClick={handleLogout} style={{ background: "transparent", border: "none", color: "#64748b", fontSize: "0.85rem", cursor: "pointer", fontWeight: 600 }}>Sign out</button>
+          <div className="flex items-center gap-6">
+            <a href="/dashboard/form-builder" className="text-slate-300 hover:text-white text-sm font-medium transition-colors">Form Builder</a>
+            <div className="h-4 w-px bg-white/10" />
+            <button onClick={handleLogout} className="text-slate-400 hover:text-red-400 text-sm font-medium transition-colors">Secure Sign Out</button>
           </div>
         </div>
       </header>
