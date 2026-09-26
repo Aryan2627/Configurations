@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { encrypt, decrypt } from '../../../lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,6 +8,13 @@ const prisma = new PrismaClient();
 
 
 
+
+
+function isValidCsrf(req: Request) {
+  // Simple CSRF: Check if custom header exists to prevent simple form POSTs
+  const csrfHeader = req.headers.get("X-Requested-With");
+  return csrfHeader === "XMLHttpRequest";
+}
 
 export async function GET(req: Request) {
   try {
@@ -16,15 +24,23 @@ export async function GET(req: Request) {
     });
     
     // Safely map features since they are stored as JSON strings
-    const safeOrgs = orgs.map(org => ({
+    
+    const safeOrgs = orgs.map(org => {
+      let decryptedFeatures = org.features;
+      if (decryptedFeatures && decryptedFeatures.includes(':')) {
+         decryptedFeatures = decrypt(decryptedFeatures);
+      }
+      return {
       id: org.id,
       name: org.name,
-      features: org.features,
+      features: decryptedFeatures,
       licenseStart: (org as any).licenseStart || null,
       licenseEnd: (org as any).licenseEnd || null,
       licenseStatus: (org as any).licenseStatus || 'Active',
       licensePlan: (org as any).licensePlan || 'Enterprise'
-    }));
+    };
+    });
+
 
     return NextResponse.json(safeOrgs);
   } catch (error: any) {
@@ -50,10 +66,29 @@ export async function POST(req: Request) {
       if (licenseStatus !== undefined) data.licenseStatus = licenseStatus;
       if (licensePlan !== undefined) data.licensePlan = licensePlan;
       
+      
+      // 4. Encrypt features (Field-level encryption)
+      if (data.features) {
+        data.features = encrypt(data.features);
+      }
+
       const updated = await prisma.organization.update({
         where: { id },
         data
       });
+
+      // 2. Immutable Audit Trail
+      await prisma.auditLog.create({
+        data: {
+          organizationId: id,
+          actorEmail: "super_admin@procgen.com",
+          action: "CONFIG_UPDATE",
+          entityType: "Organization",
+          entityRef: id,
+          details: JSON.stringify({ updatedFields: Object.keys(data) })
+        }
+      });
+
       return NextResponse.json(updated);
     } catch (innerError) {
       // Fallback: if updating new columns failed, just update features

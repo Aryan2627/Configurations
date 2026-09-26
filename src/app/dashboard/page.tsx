@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import AutoLogout from "./AutoLogout";
 
 const MODULES = [
   { id: "cortex_ai", label: "Cortex AI Swarm", desc: "Multi-agent AI procurement assistant with slash commands and S2P workflow.", category: "AI", color: "#8b5cf6", icon: "🤖", status: "flagship" },
@@ -64,7 +65,7 @@ export default function DashboardPage() {
     try {
       await fetch('/api/orgs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
         body: JSON.stringify({ 
           id: selectedOrgId,
           licenseStart: licenseData.start ? new Date(licenseData.start).toISOString() : null,
@@ -85,7 +86,7 @@ export default function DashboardPage() {
     if (!selectedOrgId) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/orgs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: selectedOrgId, features: JSON.stringify(modules) }) });
+      const res = await fetch("/api/orgs", { method: "POST", headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" }, body: JSON.stringify({ id: selectedOrgId, features: JSON.stringify(modules) }) });
       if (res.ok) {
         setSaveSuccess(true);
         setOrgs(orgs.map(o => o.id === selectedOrgId ? { ...o, features: JSON.stringify(modules) } : o));
@@ -105,7 +106,9 @@ export default function DashboardPage() {
   if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faff", color: "#475569" }}>Loading Configuration Engine...</div>;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8faff", fontFamily: "'Inter', system-ui, sans-serif", color: "#0f172a" }}>
+    <>
+      <AutoLogout />
+      <div style={{ minHeight: "100vh", background: "#f8faff", fontFamily: "'Inter', system-ui, sans-serif", color: "#0f172a" }}>
       <header style={{ position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid #e2e8f0", background: "#ffffff" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 32px", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -288,5 +291,6 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+    </>
   );
 }
