@@ -1,5 +1,6 @@
+
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -11,10 +12,33 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
 
+  // CAPTCHA State
+  const [captchaNum1, setCaptchaNum1] = useState(0);
+  const [captchaNum2, setCaptchaNum2] = useState(0);
+  const [captchaInput, setCaptchaInput] = useState("");
+
+  const generateCaptcha = () => {
+    setCaptchaNum1(Math.floor(Math.random() * 10) + 1);
+    setCaptchaNum2(Math.floor(Math.random() * 10) + 1);
+    setCaptchaInput("");
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
   const handleLogin = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+
+    // Validate CAPTCHA
+    if (parseInt(captchaInput) !== (captchaNum1 + captchaNum2)) {
+      setError("CAPTCHA validation failed. Are you human?");
+      generateCaptcha();
+      return;
+    }
+
+    setLoading(true);
     
     try {
       const res = await fetch("/api/auth", {
@@ -29,14 +53,15 @@ export default function LoginPage() {
         router.push("/dashboard");
       } else {
         setError(data.error || "Invalid access code. Please try again.");
+        generateCaptcha();
         setLoading(false);
       }
     } catch(err) {
       setError("Network error. Please try again.");
+      generateCaptcha();
       setLoading(false);
     }
   };
-
 
   return (
     <div style={{
@@ -64,15 +89,9 @@ export default function LoginPage() {
           <p style={{ color: "rgba(148,163,184,0.55)", fontSize: "0.8rem", margin: 0, letterSpacing: "0.1em", textTransform: "uppercase" }}>Super Admin Portal</p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
-          <div style={{ flex: 1, height: "1px", background: "linear-gradient(to right, transparent, rgba(99,102,241,0.25))" }} />
-          <span style={{ color: "rgba(99,102,241,0.5)", fontSize: "0.68rem", letterSpacing: "0.12em" }}>SECURE ACCESS</span>
-          <div style={{ flex: 1, height: "1px", background: "linear-gradient(to left, transparent, rgba(99,102,241,0.25))" }} />
-        </div>
-
         <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: "20px" }}>
-            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "10px" }}>Access Code</label>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "8px" }}>Password</label>
             <input
               type="password"
               value={password}
@@ -81,18 +100,46 @@ export default function LoginPage() {
               autoFocus
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              style={{ width: "100%", padding: "14px 16px", background: focused ? "rgba(99,102,241,0.06)" : "rgba(255,255,255,0.03)", border: error ? "1px solid rgba(239,68,68,0.45)" : focused ? "1px solid rgba(99,102,241,0.5)" : "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1.1rem", outline: "none", letterSpacing: "0.25em", transition: "all 0.2s", boxSizing: "border-box", boxShadow: focused ? "0 0 0 3px rgba(99,102,241,0.12)" : "none" }}
+              style={{ width: "100%", padding: "14px 16px", background: focused ? "rgba(99,102,241,0.06)" : "rgba(255,255,255,0.03)", border: error && !password ? "1px solid rgba(239,68,68,0.45)" : focused ? "1px solid rgba(99,102,241,0.5)" : "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", transition: "all 0.2s", boxSizing: "border-box" }}
             />
-            {error && <p style={{ color: "#f87171", fontSize: "0.78rem", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px", margin: "8px 0 0" }}>⚠ {error}</p>}
           </div>
 
-          <button type="submit" disabled={loading || !password} style={{ width: "100%", padding: "14px", background: loading || !password ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)", border: "none", borderRadius: "12px", color: "#fff", fontSize: "0.9rem", fontWeight: 600, cursor: loading || !password ? "not-allowed" : "pointer", letterSpacing: "0.01em", transition: "all 0.25s", boxShadow: loading || !password ? "none" : "0 4px 24px rgba(99,102,241,0.4)", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", opacity: !password ? 0.5 : 1 }}>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "8px" }}>2FA Code</label>
+            <input
+              type="text"
+              value={otp}
+              onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+              maxLength={6}
+              placeholder="000000"
+              style={{ width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", boxSizing: "border-box", letterSpacing: "0.2em", textAlign: "center" }}
+            />
+          </div>
+
+          <div style={{ marginBottom: "24px" }}>
+            <label style={{ display: "block", color: "rgba(148,163,184,0.75)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "8px" }}>Human Verification</label>
+            <div style={{ display: "flex", gap: "12px" }}>
+               <div style={{ flex: "0 0 100px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "#a8b2d1", fontWeight: "bold", userSelect: "none" }}>
+                 {captchaNum1} + {captchaNum2}
+               </div>
+               <input
+                 type="text"
+                 value={captchaInput}
+                 onChange={e => setCaptchaInput(e.target.value.replace(/\D/g, ''))}
+                 placeholder="Answer"
+                 style={{ flex: 1, width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", color: "#f1f5f9", fontSize: "1rem", outline: "none", boxSizing: "border-box", textAlign: "center" }}
+               />
+            </div>
+            {error && <p style={{ color: "#f87171", fontSize: "0.78rem", marginTop: "12px", display: "flex", alignItems: "center", gap: "6px" }}>⚠️ {error}</p>}
+          </div>
+
+          <button type="submit" disabled={loading || !password || !otp || !captchaInput} style={{ width: "100%", padding: "14px", background: loading || !password || !otp || !captchaInput ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)", border: "none", borderRadius: "12px", color: "#fff", fontSize: "0.9rem", fontWeight: 600, cursor: loading || !password || !otp || !captchaInput ? "not-allowed" : "pointer", letterSpacing: "0.01em", transition: "all 0.25s", boxShadow: loading || !password || !otp || !captchaInput ? "none" : "0 4px 24px rgba(99,102,241,0.4)", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", opacity: (!password || !otp || !captchaInput) ? 0.5 : 1 }}>
             {loading ? (
               <>
                 <div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.25)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
                 Authenticating...
               </>
-            ) : "Access Dashboard →"}
+            ) : "Secure Login →"}
           </button>
         </form>
 
