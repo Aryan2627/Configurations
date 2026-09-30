@@ -5,6 +5,8 @@ import AutoLogout from "./AutoLogout";
 import { Shield } from "lucide-react";
 
 const MODULES = [
+  { id: "main_portal", label: "Main Portal (Classic)", desc: "Enables standard procurement modules (Dashboard, Master Data, Vendors, Licenses).", category: "Core", color: "#3b82f6", icon: "🏢", status: "core" },
+  { id: "agentic_portal", label: "Agentic Portal (AI-First)", desc: "Transforms UI into an edge-to-edge, AI-only command center (Atlan style). Hides classic menus.", category: "AI", color: "#f43f5e", icon: "🚀", status: "flagship" },
   { id: "cortex_ai", label: "Cortex AI Swarm", desc: "Multi-agent AI procurement assistant with slash commands and S2P workflow.", category: "AI", color: "#8b5cf6", icon: "🤖", status: "flagship" },
   { id: "s2p", label: "Source-to-Pay", desc: "End-to-end S2P branching workflow from intake to event creation.", category: "Procurement", color: "#3b82f6", icon: "🔄", status: "core" },
   { id: "advanced_analytics", label: "Advanced Analytics", desc: "Dynamic procurement KPI dashboards with real-time metrics.", category: "Analytics", color: "#10b981", icon: "📊", status: "core" },
